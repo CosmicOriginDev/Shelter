@@ -1,6 +1,11 @@
+# INITIAL VARIABLES
+
+# Empty list for all the available shelters.
 shelters = []
 
-# Initializing variable for shelter ID
+
+########################################################################################
+# FUNCTIONS
 
 # Function to add a shelter
 def add_shelter(shelter_name, shelter_address, max_cap):
@@ -42,7 +47,10 @@ def update_max_capacity(shelter_name, new_max_capacity):
     else:
         print("Invalid shelter name.")
 
-# Unit testing!
+
+########################################################################################
+# UNIT TESTING
+
 add_shelter("Shelter A", "123 Main St.", 100)
 add_shelter("Shelter B", "69 Pepping Spaghetti St.", 69)
 print(shelters) # Prints the list of shelters to verify they were added correctly.
