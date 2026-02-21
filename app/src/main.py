@@ -24,9 +24,14 @@ def add_shelter():
     name = data.get("name")
     capacity = data.get("capacity")
 
-    response = supabase.table("shelters").insert({"name": name, "capacity": capacity}).execute()
+    try:
 
-    return jsonify({"data": response.data, "error": response.error})
+        response = supabase.table("shelters").insert({"name": name, "capacity": capacity}).execute()
+
+        return jsonify({"data": response.data, "error": None})
+    
+    except Exception as e:
+        return jsonify({"data": None, "error": str(e)}), 400
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True, host="0.0.0.0", port=5000, allow_unsafe_werkzeug=True)
+    socketio.run(app, debug=True, host="0.0.0.0", port=3000, allow_unsafe_werkzeug=True)
