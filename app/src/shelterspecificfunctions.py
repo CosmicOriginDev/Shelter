@@ -33,14 +33,29 @@ def update_people_in_shelter(shelter_name, num_people):
     else:
         print("Invalid shelter name.")
 
+# Function to update shelter's max capacity
+def update_max_capacity(shelter_name, new_max_capacity):
+    for shelter in shelters:
+        if shelter["Shelter Name"] == shelter_name:
+            shelter["Max Capacity"] = new_max_capacity
+            break
+    else:
+        print("Invalid shelter name.")
 
 # Unit testing!
 add_shelter("Shelter A", "123 Main St.", 100)
 add_shelter("Shelter B", "69 Pepping Spaghetti St.", 69)
 print(shelters) # Prints the list of shelters to verify they were added correctly.
+
 remove_shelter("Shelter A")
 print(shelters) # Prints the list of shelters to verify Shelter A was removed correctly.
+
 update_people_in_shelter("Shelter B", 50)
 print(shelters) # Prints the list of shelters to verify the current capacity of Shelter B was updated correctly.
+
 update_people_in_shelter("Shelter B", 70) # Should print an error message about exceeding max capacity.
+
+update_max_capacity("Shelter B", 80)
+print(shelters) # Prints the list of shelters to verify the max capacity of Shelter B was updated correctly.
+
 
