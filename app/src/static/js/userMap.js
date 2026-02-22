@@ -21,7 +21,7 @@ const markersById = new Map();
 
 // 3) Build pin HTML (adjust keys to your shelter object)
 function pinHtml(shelter) {
-  const number = shelter.number ?? ''; // or shelter.id, or your list index
+  const number = shelter.displayNumber ?? ''; // or shelter.id, or your list index
   const occupied = Number(shelter.current_population ?? shelter.occupied ?? 0);
   const capacity = Number(shelter.max_people ?? shelter.capacity ?? 0);
   const percent = capacity > 0 ? Math.round((occupied / capacity) * 100) : 0;
@@ -72,10 +72,15 @@ function upsertShelterMarker(shelter) {
   }
 }
 
-// 4) Receive shelters from the list module
-window.addEventListener('shelters:updated', (e) => {
-  const shelters = e.detail;
-  if (!Array.isArray(shelters)) return;
+function clearMarkers() {
+  for (const marker of markersById.values()) {
+    marker.remove();
+  }
+  markersById.clear();
+}
 
+window.addEventListener("shelters:display", (e) => {
+  const shelters = e.detail || [];
+  clearMarkers();
   shelters.forEach(upsertShelterMarker);
 });
