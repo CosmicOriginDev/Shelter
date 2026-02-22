@@ -1,66 +1,39 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="UTF-8" />
-      
-        <!-- Socket.IO client (better to use the server-served version) -->
-        <script src="/socket.io/socket.io.js"></script>
-      
-        <!-- Leaflet CSS + JS -->
-        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-      
-        <!-- Your pin styles -->
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/shelter-pin.css') }}">
-      
-        <!-- Template used for shelter list -->
-        <template id="shelter-list-item-template">
-            <div class="shelter-list-item-template">
-                <p class="name"></p>
-                <p class="capacity"></p>
-                <a class="map-link" href="yeet">GO!</a>
-            </div>
-        </template>
-      
-        <!-- ONE entry module that imports everything else -->
-        <script type="module" src="{{ url_for('static', filename='js/app_ui.js') }}"></script>
-    </head>
-  <meta charset="UTF-8" />
+<head>
+<meta charset="UTF-8" />
+<title>User UI</title>
 
-  <!-- Socket.IO client (better to use the server-served version) -->
-  <script src="/socket.io/socket.io.js"></script>
+<!-- Leaflet CSS + JS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  <!-- Leaflet CSS + JS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- Socket.IO CLIENT (use CDN, since Flask-SocketIO doesn't serve /socket.io/socket.io.js) -->
+<script src="https://cdn.socket.io/4.8.3/socket.io.min.js"
+        integrity="sha384-kzavj5fiMwLKzzD1f8S7TeoVIEi7uKHvbTA3ueZkrzYq75pNQUiUi6Dy98Q3fxb0"
+        crossorigin="anonymous"></script>
 
-  <!-- Your pin styles -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/shelter-pin.css') }}">
+<!-- Your pin styles -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/shelter-pin.css') }}">
 
-  <!-- Template used for shelter list -->
-  <template id="shelter-list-item-template">
+<!-- Template used for shelter list -->
+<template id="shelter-list-item-template">
     <div class="shelter-list-item-template">
-      <p class="name"></p>
-      <p class="capacity"></p>
-      <a class="map-link" href="yeet">GO!</a>
+        <p class="name"></p>
+        <p class="capacity"></p>
+        <a class="map-link" href="#">GO!</a>
     </div>
-  </template>
+</template>
 
-  <!-- ONE entry module that imports everything else -->
-  <script type="module" src="{{ url_for('static', filename='js/app_ui.js') }}"></script>
+<!-- ONE entry module -->
+<script type="module" src="{{ url_for('static', filename='js/app_ui.js') }}"></script>
 </head>
-    </head>
-    <body>
-        <body>
-            <h2>Map Test Page</h2>
-        
-            <!-- Leaflet renders into this -->
-            <div id="map" style="width: 100%; height: 450px;"></div>
-        
-            <!-- List renders into this -->
-            <div id="shelter-list"></div>
-        </body>
 
-        </div>
-    </body>
+<body>
+<h2>Map Test Page</h2>
+
+<div id="map" style="width: 100%; height: 450px;"></div>
+
+<div id="shelter-list"></div>
+</body>
 </html>
