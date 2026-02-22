@@ -1,22 +1,21 @@
+from flask import Flask, render_template
 from flask import Flask
 from flask import request
 from flask import jsonify
 from flask_socketio import SocketIO, emit
 import os
 from supabase import create_client, Client
-app = Flask(__name__)
-socketio = SocketIO(app)
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-from flask_socketio import SocketIO, emit
+
 app = Flask(__name__)
 socketio = SocketIO(app)
 
 @app.route('/')
-def hello_world():
-    return 'Hello, World!'
+def user_ui():
+    return render_template("user_ui.html")
 
 @app.route('/add_shelter', methods=['POST'])
 def add_shelter():
