@@ -1,9 +1,26 @@
+import './add_shelter_list_items.js';
 import './shelter-pin.js';
 import './userMap.js';
-import './add_shelter_list_items.js';
 
 import { getLocation } from './getLocation.js';
 import { getNearestN } from './nearestShelters.js';
+
+// Socket.IO bridge: server `shelter_data` -> UI `shelters:updated`
+const socket = window.io();
+
+socket.on('connect', () => {
+  console.log('socket connected:', socket.id);
+  socket.emit('send_shelters');
+});
+
+socket.on('shelter_data', (payload) => {
+  const shelters = payload?.data ?? [];
+  window.dispatchEvent(new CustomEvent('shelters:updated', { detail: shelters }));
+});
+
+socket.on('connect_error', (err) => {
+  console.error('socket connect_error:', err.message);
+});
 
 let DISPLAY_N = 2;          // <-- later you’ll change this from UI
 let userLat = null;
