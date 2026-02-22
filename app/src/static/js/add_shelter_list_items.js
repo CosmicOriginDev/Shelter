@@ -52,7 +52,7 @@ window.addEventListener("shelters:display", (e) => {
 
     const occ = shelter.current_population ?? shelter.occupied ?? "?";
     const max = shelter.max_people ?? shelter.capacity ?? "?";
-    clone.querySelector(".capacity").textContent = `Beds available: ${occ} / ${max}`;
+    clone.querySelector(".capacity").textContent = `Beds filled: ${occ} / ${max}`;
 
     const linkEl = clone.querySelector(".map-link");
     if (linkEl) {

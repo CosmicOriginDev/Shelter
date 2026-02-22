@@ -70,7 +70,7 @@ function addMarker(shelter) {
   marker.bindPopup(`
     <div style="min-width: 180px; line-height: 1.35;">
       <strong>${shelter.name ?? "Shelter"}</strong><br/>
-      Beds available: ${occ} / ${max}<br/>
+      Beds filled: ${occ} / ${max}<br/>
       <a href="${goUrl}" target="_blank" rel="noopener noreferrer">GO</a>
     </div>
   `);

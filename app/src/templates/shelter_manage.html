@@ -151,6 +151,15 @@
       transform: translateY(-1px);
       background: rgba(148, 163, 184, 0.22);
     }
+    .btn-danger {
+      color: #fecaca;
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+    }
+    .btn-danger:hover {
+      transform: translateY(-1px);
+      background: rgba(239, 68, 68, 0.3);
+    }
     .status {
       margin-top: 14px;
       padding: 11px 12px;
@@ -211,6 +220,7 @@
       <div class="actions">
         <button id="save_btn" class="btn-primary" type="button">Save Changes</button>
         <a class="btn-ghost btn-link" href="/">Back to Map</a>
+        <button id="delete_btn" class="btn-danger" type="button">Delete Shelter</button>
         <form method="POST" action="/shelter/logout">
           <button class="btn-ghost" type="submit">Logout</button>
         </form>
@@ -221,6 +231,7 @@
 
   <script>
     const saveBtn = document.getElementById("save_btn");
+    const deleteBtn = document.getElementById("delete_btn");
     const statusEl = document.getElementById("status");
 
     function setStatus(message, isError) {
@@ -250,6 +261,29 @@
         setStatus("Shelter updated successfully.", false);
       } catch (error) {
         setStatus(`Request failed: ${error}`, true);
+      }
+    });
+
+    deleteBtn.addEventListener("click", async () => {
+      const confirmed = window.confirm("Delete this shelter account permanently?");
+      if (!confirmed) return;
+
+      try {
+        const response = await fetch(`/shelter/delete`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ confirm: true })
+        });
+
+        const body = await response.json();
+        if (!response.ok || body.error) {
+          setStatus(body.error || "Delete failed", true);
+          return;
+        }
+
+        window.location.href = "/";
+      } catch (error) {
+        setStatus(`Delete request failed: ${error}`, true);
       }
     });
   </script>
