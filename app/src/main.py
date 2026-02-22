@@ -240,6 +240,33 @@ def shelter_logout():
     return redirect(url_for("shelter_login_page"))
 
 
+@app.route('/shelter/delete', methods=['POST'])
+def shelter_delete():
+    shelter_id = session.get(SHELTER_SESSION_KEY)
+    if not shelter_id:
+        if request.is_json:
+            return jsonify({"data": None, "error": "Not authenticated"}), 401
+        return redirect(url_for("shelter_login_page"))
+
+    try:
+        response = (
+            supabase.table("shelters")
+            .delete()
+            .eq("id", shelter_id)
+            .execute()
+        )
+        rows = response.data or []
+        session.pop(SHELTER_SESSION_KEY, None)
+
+        if request.is_json:
+            return jsonify({"data": rows[0] if rows else {"id": shelter_id}, "error": None})
+        return redirect(url_for("user_ui"))
+    except Exception as e:
+        if request.is_json:
+            return jsonify({"data": None, "error": str(e)}), 400
+        return redirect(url_for("shelter_manage_page"))
+
+
 @app.route('/shelter/manage', methods=['GET'])
 def shelter_manage_page():
     shelter_id = session.get(SHELTER_SESSION_KEY)
