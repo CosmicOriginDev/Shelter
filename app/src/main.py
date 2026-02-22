@@ -36,7 +36,7 @@ def add_shelter():
     except Exception as e:
         return jsonify({"data": None, "error": str(e)}), 400
 
-@socketio.on('/send_shelters')
+@socketio.on('send_shelters')
 def send_shelter():
     emit('my response', {'data': 'Server Response'})
 
