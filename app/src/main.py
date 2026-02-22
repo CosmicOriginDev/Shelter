@@ -12,8 +12,6 @@ app = Flask(__name__, template_folder="../templates", static_folder="../static")
 socketio = SocketIO(app)
 
 @app.route('/')
-#def hello_world():
-#    return 'Hello, World!'
 def home():
     return render_template("UserMap.html")
 
