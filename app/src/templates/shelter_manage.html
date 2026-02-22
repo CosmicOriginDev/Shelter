@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shelter Management</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 2rem;
+      max-width: 720px;
+    }
+    .card {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 1rem;
+    }
+    label {
+      display: block;
+      margin-top: 0.8rem;
+      font-weight: 600;
+    }
+    input {
+      width: 100%;
+      margin-top: 0.25rem;
+      padding: 0.55rem;
+      box-sizing: border-box;
+    }
+    button {
+      margin-top: 1rem;
+      padding: 0.6rem 1rem;
+      cursor: pointer;
+    }
+    .status {
+      margin-top: 1rem;
+      padding: 0.6rem;
+      border-radius: 6px;
+      display: none;
+    }
+    .status.ok {
+      background: #e7f8ef;
+      color: #1b6e3a;
+      display: block;
+    }
+    .status.error {
+      background: #fdecec;
+      color: #9c2b2b;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <h2>Shelter Management</h2>
+  <p>Update your shelter capacity and current population.</p>
+
+  <div class="card">
+    <p><strong>Shelter Name:</strong> {{ shelter.name }}</p>
+    <p><strong>Shelter ID:</strong> {{ shelter.id }}</p>
+
+    <label for="max_people">Max People</label>
+    <input id="max_people" type="number" min="0" value="{{ shelter.max_people or 0 }}" />
+
+    <label for="current_population">Current Population</label>
+    <input id="current_population" type="number" min="0" value="{{ shelter.current_population or 0 }}" />
+
+    <button id="save_btn" type="button">Save Changes</button>
+    <div id="status" class="status"></div>
+  </div>
+
+  <script>
+    const token = "{{ token }}";
+    const saveBtn = document.getElementById("save_btn");
+    const statusEl = document.getElementById("status");
+
+    function setStatus(message, isError) {
+      statusEl.textContent = message;
+      statusEl.className = isError ? "status error" : "status ok";
+    }
+
+    saveBtn.addEventListener("click", async () => {
+      const maxPeople = Number(document.getElementById("max_people").value);
+      const currentPopulation = Number(document.getElementById("current_population").value);
+
+      try {
+        const response = await fetch(`/shelter/manage/${token}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            max_people: maxPeople,
+            current_population: currentPopulation
+          })
+        });
+
+        const body = await response.json();
+        if (!response.ok || body.error) {
+          setStatus(body.error || "Update failed", true);
+          return;
+        }
+        setStatus("Shelter updated successfully.", false);
+      } catch (error) {
+        setStatus(`Request failed: ${error}`, true);
+      }
+    });
+  </script>
+</body>
+</html>
