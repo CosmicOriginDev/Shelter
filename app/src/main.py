@@ -1,6 +1,9 @@
 from flask import Flask, jsonify, redirect, render_template, request, session, url_for
 from flask_socketio import SocketIO, emit
 import os
+import json
+from urllib.parse import quote_plus
+from urllib.request import Request, urlopen
 from supabase import create_client, Client
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -39,6 +42,15 @@ def _get_shelter_by_username(username: str):
     )
     rows = response.data or []
     return rows[0] if rows else None
+
+
+def _to_non_negative_int(raw_value, field_name: str, default_value: int = 0):
+    if raw_value is None or raw_value == "":
+        return default_value
+    value = int(raw_value)
+    if value < 0:
+        raise ValueError(f"{field_name} must be non-negative")
+    return value
 
 @app.route('/')
 def user_ui():
@@ -93,9 +105,110 @@ def add_shelter():
         return jsonify({"data": None, "error": str(e)}), 400
 
 
+@app.route('/api/geocode', methods=['GET'])
+def geocode_address():
+    address = (request.args.get("address") or "").strip()
+    if not address:
+        return jsonify({"data": None, "error": "address is required"}), 400
+
+    try:
+        url = (
+            "https://nominatim.openstreetmap.org/search"
+            f"?q={quote_plus(address)}&format=jsonv2&limit=1"
+        )
+        req = Request(
+            url,
+            headers={
+                "User-Agent": "ShelterApp/1.0 (cursor-project)",
+                "Accept": "application/json",
+            },
+        )
+        with urlopen(req, timeout=10) as response:
+            payload = json.loads(response.read().decode("utf-8"))
+
+        if not payload:
+            return jsonify({"data": None, "error": "address not found"}), 404
+
+        first = payload[0]
+        data = {
+            "latitude": float(first["lat"]),
+            "longitude": float(first["lon"]),
+            "display_name": first.get("display_name"),
+        }
+        return jsonify({"data": data, "error": None})
+    except Exception as e:
+        return jsonify({"data": None, "error": f"geocoding failed: {e}"}), 502
+
+
 @app.route('/shelter/login', methods=['GET'])
 def shelter_login_page():
     return render_template("shelter_login.html")
+
+
+@app.route('/shelter/signup', methods=['GET'])
+def shelter_signup_page():
+    return render_template("shelter_signup.html")
+
+
+@app.route('/shelter/signup', methods=['POST'])
+def shelter_signup_submit():
+    payload = request.json if request.is_json else request.form
+    name = (payload.get("name") or "").strip()
+    username = (payload.get("username") or "").strip()
+    password = payload.get("password") or ""
+    confirm_password = payload.get("confirm_password") or ""
+    latitude = payload.get("latitude")
+    longitude = payload.get("longitude")
+
+    try:
+        if not name:
+            raise ValueError("shelter name is required")
+        if not username:
+            raise ValueError("username is required")
+        if len(password) < 8:
+            raise ValueError("password must be at least 8 characters")
+        if password != confirm_password:
+            raise ValueError("password and confirm password must match")
+        if latitude in (None, "") or longitude in (None, ""):
+            raise ValueError("latitude and longitude are required")
+
+        lat = float(latitude)
+        lng = float(longitude)
+        max_people = _to_non_negative_int(payload.get("max_people"), "max_people", 0)
+        current_population = _to_non_negative_int(payload.get("current_population"), "current_population", 0)
+        if current_population > max_people:
+            raise ValueError("current_population cannot exceed max_people")
+
+        existing = _get_shelter_by_username(username)
+        if existing:
+            raise ValueError("username already exists")
+
+        password_hash = generate_password_hash(password)
+
+        insert_payload = {
+            "name": name,
+            "shelter_username": username,
+            "shelter_password_hash": password_hash,
+            "max_people": max_people,
+            "current_population": current_population,
+            "latitude": lat,
+            "longitude": lng,
+        }
+
+        response = supabase.table("shelters").insert(insert_payload).execute()
+        inserted_rows = response.data or []
+        if not inserted_rows:
+            raise ValueError("failed to create shelter account")
+
+        if request.is_json:
+            return jsonify({"data": inserted_rows[0], "error": None}), 201
+
+        session[SHELTER_SESSION_KEY] = inserted_rows[0]["id"]
+        return redirect(url_for("shelter_manage_page"))
+    except Exception as e:
+        if request.is_json:
+            return jsonify({"data": None, "error": str(e)}), 400
+        return render_template("shelter_signup.html", error=str(e), form_data=dict(payload)), 400
 
 
 @app.route('/shelter/login', methods=['POST'])
