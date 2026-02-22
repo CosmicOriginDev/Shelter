@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shelter Sign Up</title>
+  <style>
+    :root {
+      --bg: #070b17;
+      --bg-2: #10182a;
+      --card: rgba(15, 23, 42, 0.72);
+      --border: rgba(255, 255, 255, 0.2);
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --accent: #3b82f6;
+      --accent-2: #8b5cf6;
+      --danger: #ef4444;
+      --ok: #22c55e;
+      --shadow: 0 20px 48px rgba(0, 0, 0, 0.35);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      min-height: 100dvh;
+      font-family: Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(1200px 600px at 10% -10%, #1d4ed8 0%, transparent 55%),
+        radial-gradient(1000px 500px at 100% 0%, #7c3aed 0%, transparent 50%),
+        linear-gradient(160deg, var(--bg) 0%, var(--bg-2) 100%);
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+    .page { width: 100%; max-width: 760px; }
+    .hero { margin-bottom: 16px; }
+    .hero h2 { margin: 0 0 8px 0; font-size: 2rem; }
+    .hero p { margin: 0; color: var(--muted); line-height: 1.45; }
+    .card {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      background: var(--card);
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .field { margin-top: 12px; }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 700;
+      color: #cbd5e1;
+      font-size: 0.92rem;
+    }
+    input {
+      width: 100%;
+      padding: 12px 13px;
+      border-radius: 12px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      background: rgba(2, 6, 23, 0.55);
+      color: var(--text);
+      transition: border-color 180ms ease, box-shadow 180ms ease;
+    }
+    input:focus-visible {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+    button, .btn-link {
+      padding: 11px 14px;
+      border-radius: 999px;
+      border: none;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .btn-primary {
+      color: #fff;
+      background: linear-gradient(90deg, var(--accent) 0%, var(--accent-2) 100%);
+      box-shadow: 0 10px 22px rgba(59, 130, 246, 0.35);
+    }
+    .btn-ghost {
+      color: #e2e8f0;
+      background: rgba(148, 163, 184, 0.16);
+      border: 1px solid rgba(148, 163, 184, 0.28);
+    }
+    .btn-inline {
+      color: #dbeafe;
+      background: rgba(59, 130, 246, 0.18);
+      border: 1px solid rgba(59, 130, 246, 0.45);
+    }
+    .hint { margin-top: 8px; color: var(--muted); font-size: 0.9rem; }
+    .status {
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      display: none;
+      font-size: 0.94rem;
+    }
+    .status.ok {
+      background: rgba(34, 197, 94, 0.2);
+      color: #bbf7d0;
+      border: 1px solid rgba(34, 197, 94, 0.34);
+      display: block;
+    }
+    .status.error {
+      background: rgba(239, 68, 68, 0.2);
+      color: #fecaca;
+      border: 1px solid rgba(239, 68, 68, 0.34);
+      display: block;
+    }
+    @media (max-width: 760px) {
+      .grid { grid-template-columns: 1fr; }
+      .actions { flex-direction: column; }
+      .actions button, .actions .btn-link { width: 100%; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="hero">
+      <h2>Create Shelter Account</h2>
+      <p>Sign up your shelter and set a map location from your address.</p>
+    </div>
+
+    <div class="card">
+      <form method="POST" action="/shelter/signup">
+        <div class="grid">
+          <div class="field">
+            <label for="name">Shelter Name</label>
+            <input id="name" name="name" type="text" value="{{ form_data.name if form_data else '' }}" required />
+          </div>
+          <div class="field">
+            <label for="username">Username</label>
+            <input id="username" name="username" type="text" autocomplete="username" value="{{ form_data.username if form_data else '' }}" required />
+          </div>
+          <div class="field">
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password" autocomplete="new-password" required />
+          </div>
+          <div class="field">
+            <label for="confirm_password">Confirm Password</label>
+            <input id="confirm_password" name="confirm_password" type="password" autocomplete="new-password" required />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="address">Address</label>
+          <input id="address" name="address" type="text" value="{{ form_data.address if form_data else '' }}" required />
+          <div class="actions">
+            <button id="geocode_btn" class="btn-inline" type="button">Find Location</button>
+          </div>
+          <p id="geo_status" class="status"></p>
+        </div>
+
+        <div class="grid">
+          <div class="field">
+            <label for="latitude">Latitude</label>
+            <input id="latitude" name="latitude" type="number" step="any" value="{{ form_data.latitude if form_data else '' }}" required />
+          </div>
+          <div class="field">
+            <label for="longitude">Longitude</label>
+            <input id="longitude" name="longitude" type="number" step="any" value="{{ form_data.longitude if form_data else '' }}" required />
+          </div>
+          <div class="field">
+            <label for="max_people">Max People</label>
+            <input id="max_people" name="max_people" type="number" min="0" value="{{ form_data.max_people if form_data else 0 }}" />
+          </div>
+          <div class="field">
+            <label for="current_population">Current Population</label>
+            <input id="current_population" name="current_population" type="number" min="0" value="{{ form_data.current_population if form_data else 0 }}" />
+          </div>
+        </div>
+
+        <p class="hint">Tip: click "Find Location" to auto-fill latitude/longitude from address.</p>
+
+        <div class="actions">
+          <button class="btn-primary" type="submit">Create Account</button>
+          <a class="btn-link btn-ghost" href="/shelter/login">Back to Login</a>
+          <a class="btn-link btn-ghost" href="/">Back to Map</a>
+        </div>
+      </form>
+
+      {% if error %}
+      <p class="status error">{{ error }}</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <script>
+    const addressInput = document.getElementById("address");
+    const latitudeInput = document.getElementById("latitude");
+    const longitudeInput = document.getElementById("longitude");
+    const geocodeBtn = document.getElementById("geocode_btn");
+    const geoStatus = document.getElementById("geo_status");
+
+    function setGeoStatus(message, isError) {
+      geoStatus.textContent = message;
+      geoStatus.className = isError ? "status error" : "status ok";
+    }
+
+    geocodeBtn.addEventListener("click", async () => {
+      const address = (addressInput.value || "").trim();
+      if (!address) {
+        setGeoStatus("Please enter an address first.", true);
+        return;
+      }
+
+      geocodeBtn.disabled = true;
+      setGeoStatus("Finding location...", false);
+
+      try {
+        const response = await fetch(`/api/geocode?address=${encodeURIComponent(address)}`);
+        const body = await response.json();
+
+        if (!response.ok || body.error || !body.data) {
+          setGeoStatus(body.error || "Unable to find location.", true);
+          return;
+        }
+
+        latitudeInput.value = body.data.latitude;
+        longitudeInput.value = body.data.longitude;
+        setGeoStatus(`Location found: ${body.data.display_name || "Address matched"}`, false);
+      } catch (error) {
+        setGeoStatus(`Geocoding request failed: ${error}`, true);
+      } finally {
+        geocodeBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
