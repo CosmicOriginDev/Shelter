@@ -22,7 +22,7 @@ def add_shelter():
 
     try:
 
-        response = supabase.table("shelters").insert({"name": name, "capacity": capacity}).execute()
+        response = supabase.table("shelters").insert({"name": name, "max_people": capacity}).execute()
 
         return jsonify({"data": response.data, "error": None})
     
