@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Shelter Pin Test</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    padding: 40px;
+    background: #f4f4f4;
+}
+
+.pin {
+    position: relative;
+    width: 80px;
+    text-align: center;
+}
+
+/* The clickable circle button */
+.progress-ring {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: none;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    background: transparent;
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Draw the ring on a pseudo-element so we can flip ONLY the ring */
+.progress-ring::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+
+    /* progress ring */
+    background: conic-gradient(
+        #4CAF50 calc(var(--percent) * 1%),
+        #ddd 0
+    );
+
+    /* flip horizontally so the fill direction becomes counter-clockwise */
+    transform: scaleX(-1);
+}
+
+/* Inner white circle */
+.progress-ring::after {
+    content: "";
+    position: absolute;
+    width: 58px;
+    height: 58px;
+    background: white;
+    border-radius: 50%;
+    z-index: 0;
+}
+
+/* Center number */
+.progress-ring span {
+    position: relative;
+    z-index: 1;
+    font-weight: bold;
+    font-size: 18px;
+    color: #222;
+}
+
+/* Optional: focus ring for keyboard accessibility */
+.progress-ring:focus-visible {
+    outline: 3px solid #333;
+    outline-offset: 4px;
+}
+
+/* Pin tip */
+.pin::after {
+    content: "";
+    position: absolute;
+    bottom: -18px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 18px solid #4CAF50;
+}
+</style>
+</head>
+
+<body>
+<h2>Shelter Pin Test</h2>
+
+<shelter-pin
+    number="1"
+    capacity="100"
+    occupied="45"
+    lat="38.6270"
+    lng="-90.1994">
+</shelter-pin>
+
+<br><br>
+
+<shelter-pin
+    number="2"
+    capacity="80"
+    occupied="80"
+    lat="38.6200"
+    lng="-90.2100">
+</shelter-pin>
+
+<script>
+class ShelterPin extends HTMLElement {
+    connectedCallback() {
+        const number = this.getAttribute('number');
+        const capacity = parseInt(this.getAttribute('capacity'), 10);
+        const occupied = parseInt(this.getAttribute('occupied'), 10);
+        const percent = capacity > 0 ? Math.round((occupied / capacity) * 100) : 0;
+
+        this.innerHTML = `
+            <div class="pin">
+                <button class="progress-ring" type="button" style="--percent:${percent}" aria-label="Navigate to location ${number}">
+                    <span>${number}</span>
+                </button>
+            </div>
+        `;
+
+        this.querySelector('.progress-ring').onclick = () => {
+            const lat = this.getAttribute('lat');
+            const lng = this.getAttribute('lng');
+            window.open(
+              `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`,
+              '_blank'
+            );
+        };
+    }
+}
+
+customElements.define('shelter-pin', ShelterPin);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,59 @@
+.pin {
+    position: relative;
+    width: 80px;
+    text-align: center;
+}
+
+.progress-ring {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: none;
+    padding: 0;
+    background: transparent;
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.progress-ring::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: conic-gradient(#4CAF50 calc(var(--percent) * 1%), #ddd 0);
+    transform: scaleX(-1); /* counter-clockwise */
+    z-index: 0;
+}
+
+.progress-ring::after {
+    content: "";
+    position: absolute;
+    width: 58px;
+    height: 58px;
+    background: white;
+    border-radius: 50%;
+    z-index: 1;
+}
+
+.progress-ring span {
+    position: relative;
+    z-index: 2;   /* sits above white circle */
+    font-weight: bold;
+    font-size: 20px;
+    color: #222;
+}
+
+.pin::after {
+    content: "";
+    position: absolute;
+    bottom: -18px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0; height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 18px solid #4CAF50;
+}

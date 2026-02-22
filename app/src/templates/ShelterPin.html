@@ -1,0 +1,32 @@
+<script>
+class ShelterPin extends HTMLElement {
+    connectedCallback() {
+        const number = this.getAttribute('number');
+        const capacity = parseInt(this.getAttribute('capacity'));
+        const occupied = parseInt(this.getAttribute('occupied'));
+        const percent = Math.round((occupied / capacity) * 100);
+
+        this.innerHTML = `
+            <div class="pin">
+                <h3>${number}</h3>
+                <div class="progress-ring" 
+                     style="--percent:${percent}">
+                    ${occupied}/${capacity}
+                </div>
+                <button id="navBtn">Navigate</button>
+            </div>
+        `;
+
+        this.querySelector('#navBtn').onclick = () => {
+            const lat = this.getAttribute('lat');
+            const lng = this.getAttribute('lng');
+            window.open(
+              `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`,
+              '_blank'
+            );
+        };
+    }
+}
+
+customElements.define('shelter-pin', ShelterPin);
+</script>

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="https://cdn.socket.io/4.8.3/socket.io.min.js" integrity="sha384-kzavj5fiMwLKzzD1f8S7TeoVIEi7uKHvbTA3ueZkrzYq75pNQUiUi6Dy98Q3fxb0" crossorigin="anonymous"></script>
+        <template id="shelter-list-item-template">
+            <div class="shelter-list-item-template">
+                <p class="name"></p>
+                <p class="capacity"></p>
+                <a class="map-link" href="yeet">GO!</a>
+            </div>
+        </template>
+       
+    </head>
+    <body>
+        <iframe></iframe>
+        <div id="shelter-list">
+
+        </div>
+    </body>
+    <script src="{{ url_for('static', filename='js/add_shelter_list_items.js') }}" defer></script>
+</html>
