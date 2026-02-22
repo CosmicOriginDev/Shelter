@@ -3,17 +3,18 @@ from flask import request
 from flask import jsonify
 from flask_socketio import SocketIO, emit
 import os
+from supabase import create_client, Client
+
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
-from flask_socketio import SocketIO, emit
-from supabase import create_client, Client
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
 app = Flask(__name__, template_folder="../templates", static_folder="../static")
 socketio = SocketIO(app)
 
 @app.route('/')
-def home():
-    return render_template("UserMap.html")
+def user_ui():
+    return render_template("user_ui.html")
 
 @app.route('/add_shelter', methods=['POST'])
 def add_shelter():
