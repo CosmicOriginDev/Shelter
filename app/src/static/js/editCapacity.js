@@ -1,3 +1,4 @@
+
 export function setOccupied(pinEl, occupied) {
     pinEl.setAttribute('occupied', String(occupied));
   }

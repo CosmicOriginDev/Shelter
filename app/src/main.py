@@ -179,6 +179,10 @@ def shelter_manage_update():
     except Exception as e:
         return jsonify({"data": None, "error": str(e)}), 400
 
+@socketio.on('shelter_updated')
+def update_shelter_data():
+    emit('shelter_data_changed')
+
 @socketio.on('send_shelters')
 def send_shelter():
     emit('my response', {'data': 'Server Response'})

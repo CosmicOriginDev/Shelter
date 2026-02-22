@@ -6,6 +6,10 @@ const template = document.getElementById("shelter-list-item-template");
 // Ask server for shelters
 socket.emit("send_shelters");
 
+window.addEventListener("shelter_data_changed", (e) => {
+  socket.emit("send_shelters");
+});
+
 // Receive full shelter list from server
 socket.on("shelter_data", (data) => {
   const shelters = data?.data ?? [];

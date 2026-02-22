@@ -211,6 +211,7 @@
   </div>
 
   <script>
+    const socket = io();
     const saveBtn = document.getElementById("save_btn");
     const statusEl = document.getElementById("status");
 
@@ -239,6 +240,7 @@
           return;
         }
         setStatus("Shelter updated successfully.", false);
+        socket.emit("shelter_updated")
       } catch (error) {
         setStatus(`Request failed: ${error}`, true);
       }
