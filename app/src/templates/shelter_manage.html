@@ -5,71 +5,212 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Shelter Management</title>
   <style>
+    :root {
+      --bg: #070b17;
+      --bg-2: #10182a;
+      --card: rgba(15, 23, 42, 0.72);
+      --border: rgba(255, 255, 255, 0.2);
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --accent: #3b82f6;
+      --accent-2: #8b5cf6;
+      --danger: #ef4444;
+      --success: #22c55e;
+      --shadow: 0 20px 48px rgba(0, 0, 0, 0.35);
+    }
+    * {
+      box-sizing: border-box;
+    }
     body {
+      margin: 0;
+      min-height: 100vh;
+      min-height: 100dvh;
       font-family: Arial, sans-serif;
-      margin: 2rem;
-      max-width: 720px;
+      color: var(--text);
+      background:
+        radial-gradient(1200px 600px at 10% -10%, #1d4ed8 0%, transparent 55%),
+        radial-gradient(1000px 500px at 100% 0%, #7c3aed 0%, transparent 50%),
+        linear-gradient(160deg, var(--bg) 0%, var(--bg-2) 100%);
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+    .page {
+      width: 100%;
+      max-width: 760px;
+    }
+    .hero {
+      margin-bottom: 16px;
+    }
+    .hero h2 {
+      margin: 0 0 8px 0;
+      font-size: 2rem;
+      letter-spacing: 0.2px;
+    }
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.45;
     }
     .card {
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      padding: 1rem;
-      margin-top: 1rem;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      background: var(--card);
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+    }
+    .meta {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .meta-item {
+      background: rgba(2, 6, 23, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      padding: 10px 12px;
+    }
+    .meta-label {
+      color: var(--muted);
+      font-size: 0.8rem;
+      margin: 0 0 4px 0;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+    .meta-value {
+      margin: 0;
+      font-weight: 700;
     }
     label {
       display: block;
-      margin-top: 0.8rem;
-      font-weight: 600;
+      margin-top: 14px;
+      font-weight: 700;
+      color: #cbd5e1;
+      font-size: 0.92rem;
     }
     input {
       width: 100%;
-      margin-top: 0.25rem;
-      padding: 0.55rem;
-      box-sizing: border-box;
+      margin-top: 6px;
+      padding: 12px 13px;
+      border-radius: 12px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      background: rgba(2, 6, 23, 0.55);
+      color: var(--text);
+      transition: border-color 180ms ease, box-shadow 180ms ease;
+    }
+    input:focus-visible {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
     }
     button {
-      margin-top: 1rem;
-      padding: 0.6rem 1rem;
+      margin-top: 16px;
+      padding: 11px 14px;
       cursor: pointer;
+      border: none;
+      border-radius: 999px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      transition: transform 180ms ease, box-shadow 180ms ease, opacity 180ms ease;
+    }
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+    .btn-primary {
+      color: #fff;
+      background: linear-gradient(90deg, var(--accent) 0%, var(--accent-2) 100%);
+      box-shadow: 0 10px 22px rgba(59, 130, 246, 0.35);
+    }
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 14px 26px rgba(59, 130, 246, 0.4);
+    }
+    .btn-ghost {
+      color: #e2e8f0;
+      background: rgba(148, 163, 184, 0.16);
+      border: 1px solid rgba(148, 163, 184, 0.28);
+    }
+    .btn-ghost:hover {
+      transform: translateY(-1px);
+      background: rgba(148, 163, 184, 0.22);
     }
     .status {
-      margin-top: 1rem;
-      padding: 0.6rem;
-      border-radius: 6px;
+      margin-top: 14px;
+      padding: 11px 12px;
+      border-radius: 10px;
       display: none;
+      font-size: 0.94rem;
     }
     .status.ok {
-      background: #e7f8ef;
-      color: #1b6e3a;
+      background: rgba(34, 197, 94, 0.2);
+      color: #bbf7d0;
+      border: 1px solid rgba(34, 197, 94, 0.34);
       display: block;
     }
     .status.error {
-      background: #fdecec;
-      color: #9c2b2b;
+      background: rgba(239, 68, 68, 0.2);
+      color: #fecaca;
+      border: 1px solid rgba(239, 68, 68, 0.34);
       display: block;
+    }
+    @media (max-width: 720px) {
+      .meta {
+        grid-template-columns: 1fr;
+      }
+      .actions {
+        flex-direction: column;
+      }
+      .actions button {
+        width: 100%;
+      }
     }
   </style>
 </head>
 <body>
-  <h2>Shelter Management</h2>
-  <p>Update your shelter capacity and current population.</p>
+  <div class="page">
+    <div class="hero">
+      <h2>Shelter Management</h2>
+      <p>Update your shelter capacity and live occupancy status.</p>
+    </div>
 
-  <div class="card">
-    <p><strong>Shelter Name:</strong> {{ shelter.name }}</p>
-    <p><strong>Shelter ID:</strong> {{ shelter.id }}</p>
+    <div class="card">
+      <div class="meta">
+        <div class="meta-item">
+          <p class="meta-label">Shelter Name</p>
+          <p class="meta-value">{{ shelter.name }}</p>
+        </div>
+        <div class="meta-item">
+          <p class="meta-label">Shelter ID</p>
+          <p class="meta-value">{{ shelter.id }}</p>
+        </div>
+        <div class="meta-item">
+          <p class="meta-label">Username</p>
+          <p class="meta-value">{{ shelter.shelter_username }}</p>
+        </div>
+      </div>
 
-    <label for="max_people">Max People</label>
-    <input id="max_people" type="number" min="0" value="{{ shelter.max_people or 0 }}" />
+      <label for="max_people">Max People</label>
+      <input id="max_people" type="number" min="0" value="{{ shelter.max_people or 0 }}" />
 
-    <label for="current_population">Current Population</label>
-    <input id="current_population" type="number" min="0" value="{{ shelter.current_population or 0 }}" />
+      <label for="current_population">Current Population</label>
+      <input id="current_population" type="number" min="0" value="{{ shelter.current_population or 0 }}" />
 
-    <button id="save_btn" type="button">Save Changes</button>
-    <div id="status" class="status"></div>
+      <div class="actions">
+        <button id="save_btn" class="btn-primary" type="button">Save Changes</button>
+        <form method="POST" action="/shelter/logout">
+          <button class="btn-ghost" type="submit">Logout</button>
+        </form>
+      </div>
+      <div id="status" class="status"></div>
+    </div>
   </div>
 
   <script>
-    const token = "{{ token }}";
     const saveBtn = document.getElementById("save_btn");
     const statusEl = document.getElementById("status");
 
@@ -83,7 +224,7 @@
       const currentPopulation = Number(document.getElementById("current_population").value);
 
       try {
-        const response = await fetch(`/shelter/manage/${token}`, {
+        const response = await fetch(`/shelter/manage`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

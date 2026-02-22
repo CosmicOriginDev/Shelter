@@ -5,7 +5,7 @@ import './add_shelter_list_items.js';
 import { getLocation } from './getLocation.js';
 import { getNearestN } from './nearestShelters.js';
 
-let DISPLAY_N = 2;
+let DISPLAY_N = 5;
 let userLat = null;
 let userLng = null;
 let lastShelters = [];

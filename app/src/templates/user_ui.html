@@ -2,6 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>User UI</title>
 
 <!-- Leaflet CSS + JS -->
@@ -31,10 +32,16 @@
 </head>
 
 <body>
-<h2>Map Test Page</h2>
+<div class="app-shell">
+  <div id="map"></div>
 
-<div id="map" style="width: 100%; height: 450px;"></div>
+  <div class="top-actions">
+    <a class="login-btn" href="/shelter/login">Shelter Login</a>
+  </div>
 
-<div id="shelter-list"></div>
+  <div class="bottom-strip">
+    <div id="shelter-list"></div>
+  </div>
+</div>
 </body>
 </html>

@@ -1,11 +1,8 @@
-from flask import Flask, render_template
-from flask import request
-from flask import jsonify
+from flask import Flask, jsonify, redirect, render_template, request, session, url_for
 from flask_socketio import SocketIO, emit
 import os
-import hashlib
-import secrets
 from supabase import create_client, Client
+from werkzeug.security import check_password_hash, generate_password_hash
 
 
 
@@ -14,21 +11,29 @@ SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
+app.secret_key = os.environ.get("FLASK_SECRET_KEY", "dev-secret-change-me")
 socketio = SocketIO(app)
 
-MANAGE_TOKEN_BYTES = 24
+SHELTER_SESSION_KEY = "shelter_id"
 
 
-def _hash_token(raw_token: str) -> str:
-    return hashlib.sha256(raw_token.encode("utf-8")).hexdigest()
-
-
-def _get_shelter_by_token(raw_token: str):
-    token_hash = _hash_token(raw_token)
+def _get_shelter_by_id(shelter_id: int):
     response = (
         supabase.table("shelters")
-        .select("id,name,max_people,current_population")
-        .eq("manage_token_hash", token_hash)
+        .select("id,name,max_people,current_population,shelter_username")
+        .eq("id", shelter_id)
+        .limit(1)
+        .execute()
+    )
+    rows = response.data or []
+    return rows[0] if rows else None
+
+
+def _get_shelter_by_username(username: str):
+    response = (
+        supabase.table("shelters")
+        .select("id,name,shelter_username,shelter_password_hash,max_people,current_population")
+        .eq("shelter_username", username)
         .limit(1)
         .execute()
     )
@@ -41,16 +46,24 @@ def user_ui():
 
 @app.route('/add_shelter', methods=['POST'])
 def add_shelter():
-    data = request.json
+    data = request.json or {}
     name = data.get("name")
     max_people = data.get("max_people")
     latitude = data.get("latitude")
     longitude = data.get("longitude")
     current_population = data.get("current_population")
+    shelter_username = data.get("username")
+    shelter_password = data.get("password")
 
     try:
-        manage_token = secrets.token_urlsafe(MANAGE_TOKEN_BYTES)
-        manage_token_hash = _hash_token(manage_token)
+        if not shelter_username or not shelter_password:
+            return jsonify({"data": None, "error": "username and password are required"}), 400
+
+        existing = _get_shelter_by_username(shelter_username)
+        if existing:
+            return jsonify({"data": None, "error": "username already exists"}), 400
+
+        password_hash = generate_password_hash(shelter_password)
 
         response = (
             supabase.table("shelters")
@@ -61,7 +74,8 @@ def add_shelter():
                     "latitude": latitude,
                     "longitude": longitude,
                     "current_population": current_population,
-                    "manage_token_hash": manage_token_hash,
+                    "shelter_username": shelter_username,
+                    "shelter_password_hash": password_hash,
                 }
             )
             .execute()
@@ -72,36 +86,74 @@ def add_shelter():
             return jsonify({"data": None, "error": "Shelter was not created"}), 500
 
         inserted = inserted_rows[0]
-        manage_url = f"{request.host_url.rstrip('/')}/shelter/manage/{manage_token}"
-
-        return jsonify({"data": inserted, "manage_url": manage_url, "error": None})
+        login_url = f"{request.host_url.rstrip('/')}/shelter/login"
+        return jsonify({"data": inserted, "login_url": login_url, "error": None})
     
     except Exception as e:
         return jsonify({"data": None, "error": str(e)}), 400
 
 
-@app.route('/shelter/manage/<token>', methods=['GET'])
-def shelter_manage_page(token):
+@app.route('/shelter/login', methods=['GET'])
+def shelter_login_page():
+    return render_template("shelter_login.html")
+
+
+@app.route('/shelter/login', methods=['POST'])
+def shelter_login_submit():
+    payload = request.json if request.is_json else request.form
+    username = (payload.get("username") or "").strip()
+    password = payload.get("password") or ""
+
     try:
-        shelter = _get_shelter_by_token(token)
+        shelter = _get_shelter_by_username(username)
+        if not shelter or not check_password_hash(shelter.get("shelter_password_hash") or "", password):
+            if request.is_json:
+                return jsonify({"data": None, "error": "Invalid username or password"}), 401
+            return render_template("shelter_login.html", error="Invalid username or password"), 401
+
+        session[SHELTER_SESSION_KEY] = shelter["id"]
+        if request.is_json:
+            return jsonify({"data": {"id": shelter["id"], "username": shelter["shelter_username"]}, "error": None})
+        return redirect(url_for("shelter_manage_page"))
+    except Exception as e:
+        if request.is_json:
+            return jsonify({"data": None, "error": str(e)}), 400
+        return render_template("shelter_login.html", error=str(e)), 400
+
+
+@app.route('/shelter/logout', methods=['POST'])
+def shelter_logout():
+    session.pop(SHELTER_SESSION_KEY, None)
+    return redirect(url_for("shelter_login_page"))
+
+
+@app.route('/shelter/manage', methods=['GET'])
+def shelter_manage_page():
+    shelter_id = session.get(SHELTER_SESSION_KEY)
+    if not shelter_id:
+        return redirect(url_for("shelter_login_page"))
+
+    try:
+        shelter = _get_shelter_by_id(shelter_id)
         if not shelter:
-            return "Invalid or expired manage link", 404
-        return render_template("shelter_manage.html", shelter=shelter, token=token)
+            session.pop(SHELTER_SESSION_KEY, None)
+            return redirect(url_for("shelter_login_page"))
+        return render_template("shelter_manage.html", shelter=shelter)
     except Exception as e:
         return f"Unable to load shelter: {e}", 400
 
 
-@app.route('/shelter/manage/<token>', methods=['PATCH'])
-def shelter_manage_update(token):
+@app.route('/shelter/manage', methods=['PATCH'])
+def shelter_manage_update():
+    shelter_id = session.get(SHELTER_SESSION_KEY)
+    if not shelter_id:
+        return jsonify({"data": None, "error": "Not authenticated"}), 401
+
     payload = request.json or {}
     raw_max_people = payload.get("max_people")
     raw_current_population = payload.get("current_population")
 
     try:
-        shelter = _get_shelter_by_token(token)
-        if not shelter:
-            return jsonify({"data": None, "error": "Invalid manage link"}), 404
-
         if raw_max_people is None or raw_current_population is None:
             return jsonify({"data": None, "error": "max_people and current_population are required"}), 400
 
@@ -116,7 +168,7 @@ def shelter_manage_update(token):
         update_response = (
             supabase.table("shelters")
             .update({"max_people": max_people, "current_population": current_population})
-            .eq("id", shelter["id"])
+            .eq("id", shelter_id)
             .execute()
         )
 
