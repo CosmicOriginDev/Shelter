@@ -9,8 +9,7 @@ socket.emit('send_shelters')
 
 socket.on("shelter_data", (data) => {
   console.log("Received shelters:", data);
-  var new_data = JSON.parse(data);
-  shelters.push(new_data);
+  shelters.push(data);
   shelters.forEach(shelter => {
     const clone = template.content.cloneNode(true);
   
