@@ -1,6 +1,5 @@
 import { getLocation } from './getLocation.js';
 
-// 1) Create map
 const map = L.map('map', {
   zoomAnimation: false,
   fadeAnimation: false,
@@ -16,12 +15,10 @@ getLocation((lat, lng) => {
   map.setView([lat, lng], 14);
 });
 
-// 2) Marker store
 const markersById = new Map();
 
-// 3) Build pin HTML (adjust keys to your shelter object)
 function pinHtml(shelter) {
-  const number = shelter.displayNumber ?? ''; // or shelter.id, or your list index
+  const number = shelter.displayNumber ?? '';
   const occupied = Number(shelter.current_population ?? shelter.occupied ?? 0);
   const capacity = Number(shelter.max_people ?? shelter.capacity ?? 0);
   const percent = capacity > 0 ? Math.round((occupied / capacity) * 100) : 0;
@@ -35,12 +32,14 @@ function pinHtml(shelter) {
   `;
 }
 
-function upsertShelterMarker(shelter) {
-  // Use latitude/longitude as you said
+function clearMarkers() {
+  for (const m of markersById.values()) m.remove();
+  markersById.clear();
+}
+
+function addMarker(shelter) {
   const lat = Number(shelter.latitude);
   const lng = Number(shelter.longitude);
-
-  // Skip bad data safely
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
 
   const icon = L.divIcon({
@@ -50,37 +49,23 @@ function upsertShelterMarker(shelter) {
     iconAnchor: [40, 98],
   });
 
-  const id = shelter.id ?? `${lat},${lng}`; // fallback id if needed
+  const marker = L.marker([lat, lng], { icon }).addTo(map);
 
-  let marker = markersById.get(id);
-  if (!marker) {
-    marker = L.marker([lat, lng], { icon }).addTo(map);
+  // Keep #1 on top, #2 below, etc.
+  marker.setZIndexOffset(1000 - (shelter.displayNumber ?? 0));
 
-    marker.on('click', () => {
-      // Prefer map_link if present
-      const url = shelter.map_link
-        ? shelter.map_link
-        : `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+  marker.on('click', () => {
+    const url = shelter.map_link
+      ? shelter.map_link
+      : `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+    window.open(url, "_blank");
+  });
 
-      window.open(url, '_blank');
-    });
-
-    markersById.set(id, marker);
-  } else {
-    marker.setLatLng([lat, lng]);
-    marker.setIcon(icon);
-  }
+  markersById.set(shelter.id ?? `${lat},${lng}`, marker);
 }
 
-function clearMarkers() {
-  for (const marker of markersById.values()) {
-    marker.remove();
-  }
-  markersById.clear();
-}
-
-window.addEventListener("shelters:display", (e) => {
+window.addEventListener('shelters:display', (e) => {
   const shelters = e.detail || [];
   clearMarkers();
-  shelters.forEach(upsertShelterMarker);
+  shelters.forEach(addMarker);
 });

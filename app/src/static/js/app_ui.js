@@ -5,42 +5,41 @@ import './add_shelter_list_items.js';
 import { getLocation } from './getLocation.js';
 import { getNearestN } from './nearestShelters.js';
 
-let DISPLAY_N = 2;          // <-- later you’ll change this from UI
+let DISPLAY_N = 2;
 let userLat = null;
 let userLng = null;
 let lastShelters = [];
 
-// optional: make it adjustable later from console or a UI control
 window.setDisplayN = (n) => {
   DISPLAY_N = Math.max(1, Number(n) || 1);
   recomputeAndDispatch();
 };
 
 function recomputeAndDispatch() {
-  if (userLat == null || userLng == null) return;
-  if (!Array.isArray(lastShelters)) return;
+  if (!Array.isArray(lastShelters) || lastShelters.length === 0) return;
 
-  const nearest = getNearestN(lastShelters, userLat, userLng, DISPLAY_N);
+  // If location isn't ready, fall back to first N so the UI isn't empty
+  let subset;
+  if (userLat == null || userLng == null) {
+    subset = lastShelters.slice(0, DISPLAY_N);
+  } else {
+    subset = getNearestN(lastShelters, userLat, userLng, DISPLAY_N);
+  }
 
-  // assign displayNumber 1..N so map + list match
-  const withNumbers = nearest.map((s, i) => ({
+  const withNumbers = subset.map((s, i) => ({
     ...s,
     displayNumber: i + 1
   }));
 
-  window.dispatchEvent(
-    new CustomEvent('shelters:display', { detail: withNumbers })
-  );
+  window.dispatchEvent(new CustomEvent('shelters:display', { detail: withNumbers }));
 }
 
-// Get user location once at startup
 getLocation((lat, lng) => {
   userLat = lat;
   userLng = lng;
   recomputeAndDispatch();
 });
 
-// Receive full shelter list from Socket.IO module
 window.addEventListener('shelters:updated', (e) => {
   lastShelters = e.detail || [];
   recomputeAndDispatch();
