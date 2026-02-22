@@ -20,7 +20,7 @@ def user_ui():
 def add_shelter():
     data = request.json
     name = data.get("name")
-    capacity = data.get("capacity")
+    max_people = data.get("max_people")
 
     try:
 
