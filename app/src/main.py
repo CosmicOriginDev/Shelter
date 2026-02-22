@@ -19,10 +19,13 @@ def add_shelter():
     data = request.json
     name = data.get("name")
     max_people = data.get("max_people")
+    latitude = data.get("latitude")
+    longitude = data.get("longitude")
+    current_population = data.get("current_population")
 
     try:
 
-        response = supabase.table("shelters").insert({"name": name, "max_people": max_people}).execute()
+        response = supabase.table("shelters").insert({"name": name, "max_people": max_people, "latitude": latitude, "longitude": longitude, "current_population": current_population}).execute()
 
         return jsonify({"data": response.data, "error": None})
     
