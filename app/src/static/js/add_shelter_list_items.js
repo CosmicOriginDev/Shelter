@@ -10,12 +10,12 @@ socket.emit('send_shelters')
 socket.on("shelter_data", (data) => {
   console.log("Received shelters:", data);
   shelters.push(data);
-  shelters.forEach(shelter => {
+  shelters.data.forEach(shelter => {
     const clone = template.content.cloneNode(true);
   
-    clone.querySelector(".name").textContent = shelter.data.name;
-    clone.querySelector(".capacity").textContent = `Beds available: ${shelter.data.current_population} / ${shelter.data.capacity}`;
-    clone.querySelector(".map-link").href = shelter.data.map_link;
+    clone.querySelector(".name").textContent = shelter.name;
+    clone.querySelector(".capacity").textContent = `Beds available: ${shelter.current_population} / ${shelter.capacity}`;
+    clone.querySelector(".map-link").href = shelter.map_link;
   
     container.appendChild(clone);
   });
