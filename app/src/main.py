@@ -36,9 +36,8 @@ def add_shelter():
     except Exception as e:
         return jsonify({"data": None, "error": str(e)}), 400
 
-@socketio.on('/add_shelter', methods=['POST'])
-def send_shelter(n_shelter):
-    print('received number of shelters: ' + n_shelter)
+@socketio.on('/send_shelters')
+def send_shelter():
     emit('my response', {'data': 'Server Response'})
 
     try:
@@ -52,9 +51,8 @@ def send_shelter(n_shelter):
         all_shelters = response.data
         print(f"Total shelters fetched: {len(all_shelters)}")
         
-        emit('my response', {
-            'data': 'All Shelters Fetched', 
-            'shelters': all_shelters
+        emit('shelter_data', {
+            'data': all_shelters
         })
         
     except Exception as e:
