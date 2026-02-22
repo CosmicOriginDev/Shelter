@@ -13,9 +13,9 @@ socket.on("shelter_data", (data) => {
   shelters.forEach(shelter => {
     const clone = template.content.cloneNode(true);
   
-    clone.querySelector(".name").textContent = shelter.name;
-    clone.querySelector(".capacity").textContent = `Capacity: ${shelter.capacity}`;
-    clone.querySelector(".map-link").href = shelter.map_link;
+    clone.querySelector(".name").textContent = shelter.data.name;
+    clone.querySelector(".capacity").textContent = `Beds available: ${shelter.data.current_population} / ${shelter.data.capacity}`;
+    clone.querySelector(".map-link").href = shelter.data.map_link;
   
     container.appendChild(clone);
   });
